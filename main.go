@@ -197,8 +197,6 @@ func Remove(id, fileName string) string {
 		if objectJson.Id == id {
 			objects = append(objects[:i], objects[i+1:]...)
 			result, _ := json.Marshal(objects)
-			file.Truncate(0)
-			file.Seek(0, 0)
 			file.Write(result)
 
 			return ""
