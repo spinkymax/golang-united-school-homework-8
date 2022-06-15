@@ -82,7 +82,7 @@ func Perform(args Arguments, writer io.Writer) error {
 				return errors.New("-id flag has to be specified")
 			}
 
-			str := Remove(args["id"], args["fileName"])
+			str := remove(args["id"], args["fileName"])
 			_, err := writer.Write([]byte(str))
 			if err != nil {
 				return err
@@ -175,7 +175,7 @@ func findById(id, fileName string, writer io.Writer) error {
 	return nil
 }
 
-func Remove(id, fileName string) string {
+func remove(id, fileName string) string {
 	file, err := os.OpenFile(fileName, os.O_RDWR, 0644)
 	if err != nil {
 		return "Sorry, but I can't open it"
@@ -197,6 +197,8 @@ func Remove(id, fileName string) string {
 		if objectJson.Id == id {
 			objects = append(objects[:i], objects[i+1:]...)
 			result, _ := json.Marshal(objects)
+			file.Truncate(0)
+			file.Seek(0, 0)		
 			file.Write(result)
 
 			return ""
