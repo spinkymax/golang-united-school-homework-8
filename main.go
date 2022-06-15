@@ -126,8 +126,9 @@ func add(item, fileName string, writer io.Writer) error {
 	} else {
 		for _, user := range users {
 			if user.Id == newUser.Id {
-				writer.Write([]byte("Item with id" + user.Id + "already exists"))
+			writer.Write([]byte("Item with id " + user.Id + " already exists"))
 				return nil
+						
 			}
 		}
 	}
@@ -219,6 +220,6 @@ func remove(id, fileName string) string {
 			return ""
 		}
 	}
-	return "Item with " + id + " not found"
+	return "Item with id " + id + " not found"
 }
 
