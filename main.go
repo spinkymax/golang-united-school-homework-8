@@ -219,6 +219,6 @@ func remove(id, fileName string) string {
 			return ""
 		}
 	}
-	return "Item with " + id + " not found"
+	return "Item with id " + id + " not found"
 }
 
