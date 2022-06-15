@@ -70,11 +70,17 @@ func Perform(args Arguments, writer io.Writer) error {
 		}
 
 	case "findById":
-		id := args["id"]
-		if id == "" {
-			return errors.New("-id flag has to be specified")
+		{
+			if args["id"] == "" {
+				return errors.New("-id flag has to be specified")
+			}
+
+			str := findById(args["id"], args["fileName"])
+			_, err := writer.Write([]byte(str))
+			if err != nil {
+				return err
+			}
 		}
-		return findById(id, fileName, writer)
 
 	case "remove":
 		{
@@ -82,7 +88,7 @@ func Perform(args Arguments, writer io.Writer) error {
 				return errors.New("-id flag has to be specified")
 			}
 
-			str := Remove(args["id"], args["fileName"])
+			str := remove(args["id"], args["fileName"])
 			_, err := writer.Write([]byte(str))
 			if err != nil {
 				return err
@@ -120,7 +126,7 @@ func add(item, fileName string, writer io.Writer) error {
 	} else {
 		for _, user := range users {
 			if user.Id == newUser.Id {
-				writer.Write([]byte("Sorry, but item with id" + user.Id + "already exists"))
+				writer.Write([]byte("Item with id" + user.Id + "already exists"))
 				return nil
 			}
 		}
@@ -156,26 +162,35 @@ func save(users []User, fileName string) error {
 
 	return nil
 }
-func findById(id, fileName string, writer io.Writer) error {
-	var users []User
-	bytes, _ := os.ReadFile(fileName)
-	if err := json.Unmarshal(bytes, &users); err == nil {
-		for _, user := range users {
-			if user.Id == id {
-				bytes, err := json.Marshal(user)
-				if err != nil {
-					return fmt.Errorf("Sorry, but I can't marshal user as JSON: %v", err)
-				}
+func findById(id, fileName string) string {
+	file, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
+	if err != nil {
+		return "Sorry, but I can't open file"
+	}
+	defer file.Close()
 
-				writer.Write(bytes)
-			}
+	if stat, _ := file.Stat(); stat.Size() == 0 {
+		return "File " + fileName + " is empty"
+	}
+
+	objects := []User{}
+	data, err := ioutil.ReadAll(file)
+	err = json.Unmarshal(data, &objects)
+	if err != nil {
+		return "Unmarshal from file error"
+	}
+
+	for _, objectJson := range objects {
+		if objectJson.Id == id {
+			result, _ := json.Marshal(objectJson)
+			return string(result)
 		}
 	}
 
-	return nil
+	return ""
 }
 
-func Remove(id, fileName string) string {
+func remove(id, fileName string) string {
 	file, err := os.OpenFile(fileName, os.O_RDWR, 0644)
 	if err != nil {
 		return "Sorry, but I can't open it"
@@ -190,7 +205,7 @@ func Remove(id, fileName string) string {
 	data, err := ioutil.ReadAll(file)
 	err = json.Unmarshal(data, &objects)
 	if err != nil {
-		return "Unmarshal from file error"
+		return ""
 	}
 
 	for i, objectJson := range objects {
@@ -206,3 +221,4 @@ func Remove(id, fileName string) string {
 	}
 	return "Item with " + id + " not found"
 }
+
