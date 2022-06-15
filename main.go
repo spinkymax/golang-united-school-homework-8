@@ -213,7 +213,7 @@ func remove(id, fileName string) string {
 			objects = append(objects[:i], objects[i+1:]...)
 			result, _ := json.Marshal(objects)
 			file.Truncate(0)
-			file.Seek(0, 0)
+			file.Seek(0, 0)		
 			file.Write(result)
 
 			return ""
